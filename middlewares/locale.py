@@ -1,4 +1,4 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from accept_language import parse_accept_language
 from starlette.requests import Request
@@ -14,6 +14,6 @@ class LocaleMiddleware(BaseHTTPMiddleware):
             lang = DEFAULT_LANG
         lang = lang[0].language
         if lang not in LANGUAGES:
-            raise HTTPException(status_code=422, detail="language_not_available")
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="language_not_available")
         request.state.lang = lang
         return await call_next(request)
