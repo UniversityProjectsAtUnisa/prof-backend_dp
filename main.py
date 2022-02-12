@@ -4,17 +4,17 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
-from middlewares.sentry import SentryMiddleware
-from middlewares.locale import LocaleMiddleware
+from core.middlewares.sentry import SentryMiddleware
+from core.middlewares.locale import LocaleMiddleware
 from providers import providers_port_mapping, create_client, close_client
 from common import utils
 from datetime import datetime
 from translation import translate
 from config import DEFAULT_MAX_AGE, LOGGING_LEVEL
-from cache import cache
+from core.cache import cache
 from frozendict import frozendict
 from definitions.scraper import ScraperStub
-from core.log_config import init_logger
+from log_config import init_logger
 import logging
 from responses.search import SuccessResponse, ConflictResponse
 import uvicorn
@@ -77,8 +77,7 @@ async def search(req: Request, res: Response, q: str, long: bool = False, cache_
         # Find result_provider
         if result is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="result_not_found")
-        if "disambiguous" in result and result["disambiguous"]:
-            res.status_code = status.HTTP_409_CONFLICT
+        if result.get("disambiguous"):
             return JSONResponse(status_code=status.HTTP_409_CONFLICT, content={"data": result['disambiguousData'], "provider": result_provider})
 
         result = {
@@ -119,7 +118,7 @@ async def search_provider(req: Request, res: Response, q: str, provider: str, lo
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="result_not_found")
         logger.info(f"Received {result}")
         result = result.to_dict()
-        if "disambiguous" in result and result['disambiguous']:
+        if result.get("disambiguous"):
             return JSONResponse(status_code=status.HTTP_409_CONFLICT, content={"data": result['disambiguousData'], "provider": provider})
 
         result = {

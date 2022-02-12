@@ -11,7 +11,6 @@ def sanitize_string(s: Optional[str]) -> Optional[str]:
     return s
 
 
-
 def get_env_variable(name, default=None):
     try:
         if default is not None:

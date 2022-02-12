@@ -1,4 +1,4 @@
-from os import getenv, getcwd, path
+from os import getcwd, path
 from common.utils import get_env_variable
 from dotenv import load_dotenv
 import logging

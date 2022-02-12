@@ -5,7 +5,7 @@ import logging
 class Marco(ScraperBase):
     async def search(self, text: str) -> ScrapeReply:
         logging.info("RICEVUTO!")
-        return ScrapeReply(language="it", disambiguous=False, data=f'{text} è bello')
+        return ScrapeReply(language="it", disambiguous=False, data=f'ciao ciao. ciao ciao '*500)
 
     async def long_search(self, text: str) -> ScrapeReply:
         logging.info("RICEVUTO!")

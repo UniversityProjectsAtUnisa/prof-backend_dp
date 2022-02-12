@@ -3,6 +3,11 @@ from pydantic import BaseModel
 from datetime import datetime
 
 
+class DisambiguousLinkResponse(BaseModel):
+    label: str
+    url: str
+
+
 class SuccessResponse(BaseModel):
     data: str
     provider: str
@@ -11,6 +16,7 @@ class SuccessResponse(BaseModel):
     requested_language: str
     created_at: datetime
 
+
 class ConflictResponse(BaseModel):
-    data: str
+    data: List[DisambiguousLinkResponse]
     provider: str
