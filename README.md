@@ -10,3 +10,13 @@ python modules from requirements.txt
 `python3 -m virtualenv venv`\
 `source venv/bin/activate`\
 `pip install -r requirements.txt`
+
+## Start services
+
+`python3 -m providers.SERVICENAME`
+
+## Start app
+
+`uvicorn main:app --reload`\
+or \
+`python3 main.py`

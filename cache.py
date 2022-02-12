@@ -1,5 +1,5 @@
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
 
 
@@ -10,7 +10,7 @@ class Cache:
 
     def retrieve(self, q: str, long: bool, lang: str, maxage: int, provider: Optional[str] = None) -> Dict[str, Any]:
         # {q:provider:long:lang:{data:"", created_at:"", original_language:"", current_language="", provider=""}}
-        mindate = datetime.now() - datetime.timedelta(seconds=maxage)
+        mindate = datetime.now() - timedelta(seconds=maxage)
         if q not in self._cache:
             return None
         values = []
@@ -39,7 +39,7 @@ class Cache:
         return None
 
     def clear(self, seconds: int):
-        maxdate = datetime.now() - datetime.timedelta(seconds=seconds)
+        maxdate = datetime.now() - timedelta(seconds=seconds)
         for q in self._cache.values():
             for provider in q.values():
                 for long in provider.values():

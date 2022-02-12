@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package scraper; 
+
+service Scraper {
+  rpc Search(ScrapeRequest) returns (ScrapeReply) {}
+  rpc LongSearch(ScrapeRequest) returns (ScrapeReply) {}
+}
+
+message ScrapeRequest {
+  string text = 1;
+}
+
+message ScrapeReply {
+  string language = 1;
+  bool disambiguous = 2;
+  string data = 3;
+  repeated DisamiguousLink disambiguousData = 4;
+}
+
+message DisamiguousLink {
+  string label = 1;
+  string url = 2;
+}

@@ -12,8 +12,10 @@ def sanitize_string(s: Optional[str]) -> Optional[str]:
 
 
 
-def get_env_variable(name):
+def get_env_variable(name, default=None):
     try:
+        if default is not None:
+            return environ.get(name, default)
         return environ[name]
     except KeyError:
         message = "Expected environment variable '{}' not set.".format(name)
