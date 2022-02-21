@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup as bs
 from definitions.scraper import ScraperBase, ScrapeReply, DisamiguousLink
+from urllib.parse import urljoin
 import logging
 import sys
 
@@ -77,19 +78,17 @@ class ScraperBritannica(ScraperBase):
         return self._cut_to_grammar_point(result[:1024])
 
     async def search(self, text: str) -> ScrapeReply:
-        logging.info("")
-
         r = None
         disambigous = True
 
         if self._is_url(text):
-            if "seach.html" in text:
-                r = self._short_scraping(self._BASE_URL+text)
+            if "search.html" in text:
+                r = self._short_scraping(f"{urljoin(self._BASE_URL, text)}")
                 disambigous = False
             else:
-                r = self._search_scraping(self._BASE_URL+text)
+                r = self._short_scraping(text)
         else:
-            r = self._search_scraping(self._SEARCH_URL+text)
+            r = self._search_scraping(self._SEARCH_URL + text)
 
         if not r:
             return #TODO: communicate error
@@ -99,7 +98,7 @@ class ScraperBritannica(ScraperBase):
                 language="en",
                 disambiguous=True,
                 data='',
-                disambiguous_data=[DisamiguousLink(label=item.label, url=item.url) for item in r])
+                disambiguous_data=[DisamiguousLink(label=f"{item['label']}", url=f"{urljoin(self._BASE_URL, item['url'])}") for item in r])
         return ScrapeReply(language="en", disambiguous=False, data=r)
 
 
@@ -108,13 +107,13 @@ class ScraperBritannica(ScraperBase):
         disambigous = True
 
         if self._is_url(text):
-            if "seach.html" in text:
-                r = self._long_scraping(self._BASE_URL+text)
+            if "search.html" in text:
+                r = self._long_scraping(f"{urljoin(self._BASE_URL, text)}")
                 disambigous = False
             else:
-                r = self._search_scraping(self._BASE_URL+text)
+                r = self._search_scraping(text)
         else:
-            r = self._search_scraping(self._SEARCH_URL+text)
+            r = self._search_scraping(self._SEARCH_URL + text)
 
         if not r:
             return #TODO: communicate error
@@ -124,5 +123,5 @@ class ScraperBritannica(ScraperBase):
                 language="en",
                 disambiguous=True,
                 data='',
-                disambiguous_data=[DisamiguousLink(label=item.label, url=item.url) for item in r])
+                disambiguous_data=[DisamiguousLink(label=item['label'], url=f"{urljoin(self._BASE_URL, item['url'])}") for item in r])
         return ScrapeReply(language="en", disambiguous=False, data=r)

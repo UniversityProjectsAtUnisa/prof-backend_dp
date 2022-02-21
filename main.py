@@ -47,8 +47,6 @@ async def shutdown_event():
 
 @app.get("/search", response_model=SuccessResponse, responses={status.HTTP_409_CONFLICT: {"model": ConflictResponse}})
 async def search(req: Request, res: Response, q: str, long: bool = False, cache_control: Optional[str] = Header(None)):
-    q = utils.sanitize_string(q)
-
     result = None
     if cache_control is None or not (cache_control.startswith("max-age=") or cache_control.startswith("no-cache")):
         result = cache.retrieve(q, long, req.state.lang, DEFAULT_MAX_AGE)
@@ -103,7 +101,7 @@ async def search(req: Request, res: Response, q: str, long: bool = False, cache_
 
 @app.get("/search/{provider}", response_model=SuccessResponse, responses={status.HTTP_409_CONFLICT: {"model": ConflictResponse}})
 async def search_provider(req: Request, res: Response, q: str, provider: str, long: bool = False, cache_control: Optional[str] = Header(None)):
-    [q, provider] = map(utils.sanitize_string, [q, provider])
+    provider = utils.sanitize_string(provider)
     if not provider in PROVIDERS:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="provider_not_available")
 

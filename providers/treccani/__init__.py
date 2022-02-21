@@ -1,8 +1,6 @@
 from definitions.scraper import ScraperBase, ScrapeReply, DisamiguousLink
 import logging
-import sys
 import requests
-from __future__ import unicode_literals
 import requests
 from bs4 import BeautifulSoup
 from requests.exceptions import RequestException
@@ -31,7 +29,7 @@ class ScraperTreccani(ScraperBase):
             if h_good == search_term or search_term in h_good:
                 child = h.find('a')
                 url_final = url_base + child.get('href')
-                final_map = {'label': h.text.strip(), 'url': url_final}
+                final_map = DisamiguousLink(label=h.text.strip(), url=url_final)
                 final_list.append(final_map)
         logging.info('Il termine inserito può avere diversi significati: \n')
         return final_list
