@@ -1,14 +1,19 @@
+from doctest import ELLIPSIS_MARKER
 import requests
 from bs4 import BeautifulSoup as bs
 from definitions.scraper import ScraperBase, ScrapeReply, DisamiguousLink
 from urllib.parse import urljoin
-import logging
-import sys
+from typing import Callable, Tuple
+
+from grpclib.exceptions import GRPCError
+from grpclib.const import Status
 
 
 class ScraperBritannica(ScraperBase):
     _BASE_URL = "https://www.britannica.com"
-    _SEARCH_URL = _BASE_URL + "/search?query="
+    _SEARCH_QUERY = "/search?query="
+    _SEARCH_URL = _BASE_URL + _SEARCH_QUERY
+
     def _is_url(self, text: str) -> bool:
         return "/" in text
     
@@ -24,13 +29,13 @@ class ScraperBritannica(ScraperBase):
         r = requests.get(url)
 
         if r.status_code != 200:
-            return False
+            raise GRPCError(status=Status.INTERNAL, message="Request to provider failed")
 
         soup = bs(r.content, "lxml")
 
         container = soup.find("ul", class_="list-unstyled results")
         if not container:
-            return False
+            raise GRPCError(status=Status.NOT_FOUND, message="Result not found")
 
         result = []
         for item in container.find_all("li"):
@@ -50,7 +55,7 @@ class ScraperBritannica(ScraperBase):
         r = requests.get(url)
 
         if r.status_code != 200:
-            return False
+            raise GRPCError(status=Status.INTERNAL, message="Request to provider failed")
         soup = bs(r.content, "lxml")
 
         paragraphs = soup.find('div', {"class": "topic-content"})
@@ -59,13 +64,13 @@ class ScraperBritannica(ScraperBase):
             if p.name in ["p", "span"]:
                 result += p.get_text()
         if result == "":
-            return False
+            raise GRPCError(status=Status.NOT_FOUND, message="Result not found")
         return result
 
     def _short_scraping(self, url: str) -> str:
         r = requests.get(url)
         if r.status_code != 200:
-            return False
+            raise GRPCError(status=Status.INTERNAL, message="Request to provider failed")
         soup = bs(r.content, "lxml")
 
         paragraphs = soup.find('div', {"class": "topic-content"})
@@ -74,24 +79,48 @@ class ScraperBritannica(ScraperBase):
             if p.name in ["p", "span"]:
                 result += p.get_text()
         if result == "":
-            return False
+            raise GRPCError(status=Status.NOT_FOUND, message="Result not found")
         return self._cut_to_grammar_point(result[:1024])
+
+    def _choose_strategy(self, text:str, is_long:bool) -> Tuple[bool, Callable, str]:
+        disambigous = True
+        strategy = None
+        param = ""
+
+        if self._BASE_URL in text:
+            if self._SEARCH_QUERY in text: #https://www.britannica.com/search?query=alabama
+                strategy = self._search_scraping
+                param = text
+                disambigous = True
+            else: #https://www.britannica.com/place/Alabama-state
+                strategy = self._short_scraping if not is_long else self._long_scraping
+                param=text
+                disambigous = False
+        else:
+            if self._SEARCH_QUERY in text: #/search?query=alabama
+                strategy = self._search_scraping
+                param=f"{urljoin(self._BASE_URL, text)}"
+                disambigous = True
+            else: 
+                if self._is_url(text): #/place/Alabama-state
+                    strategy = self._short_scraping
+                    param=f"{urljoin(self._BASE_URL, text)}"
+                    disambigous = False
+                else: #alabama
+                    strategy = self._search_scraping
+                    param=self._SEARCH_URL + text
+                    disambigous = True
+
+        return (disambigous, strategy, param)
 
     async def search(self, text: str) -> ScrapeReply:
         r = None
-        disambigous = True
+        disambigous, strategy, param = self._choose_strategy(text, False)
 
-        if self._is_url(text):
-            if "search.html" in text:
-                r = self._short_scraping(f"{urljoin(self._BASE_URL, text)}")
-                disambigous = False
-            else:
-                r = self._short_scraping(text)
-        else:
-            r = self._search_scraping(self._SEARCH_URL + text)
+        r=strategy(param)
 
         if not r:
-            return #TODO: communicate error
+            raise GRPCError(status=Status.NOT_FOUND, message="Result not found")
         
         if disambigous:
             return ScrapeReply(
@@ -104,19 +133,12 @@ class ScraperBritannica(ScraperBase):
 
     async def long_search(self, text: str) -> ScrapeReply:
         r = None
-        disambigous = True
+        disambigous, strategy, param = self._choose_strategy(text, True)
 
-        if self._is_url(text):
-            if "search.html" in text:
-                r = self._long_scraping(f"{urljoin(self._BASE_URL, text)}")
-                disambigous = False
-            else:
-                r = self._search_scraping(text)
-        else:
-            r = self._search_scraping(self._SEARCH_URL + text)
+        r=strategy(param)
 
         if not r:
-            return #TODO: communicate error
+            raise GRPCError(status=Status.NOT_FOUND, message="Result not found")
         
         if disambigous:
             return ScrapeReply(
