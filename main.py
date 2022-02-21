@@ -4,13 +4,14 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
+from grpclib import GRPCError
 from core.middlewares.sentry import SentryMiddleware
 from core.middlewares.locale import LocaleMiddleware
 from providers import providers_port_mapping, create_client, close_client
 from common import utils
 from datetime import datetime
 from translation import translate
-from config import DEFAULT_MAX_AGE, LOGGING_LEVEL
+from config import DEFAULT_MAX_AGE
 from core.cache import cache
 from frozendict import frozendict
 from definitions.scraper import ScraperStub
@@ -60,19 +61,24 @@ async def search(req: Request, res: Response, q: str, long: bool = False, cache_
         result_provider = None
         for p, stub in PROVIDERS.items():
             # iterate over providers
+            result_provider = p
             try:
-                result_provider = p
                 if long:
                     result = await stub.long_search(text=q)
                 else:
                     result = await stub.search(text=q)
-                if result is not None:
-                    logger.info(f"Received {result}")
-                    result = result.to_dict()
-                    break
+            except GRPCError as e:
+                logger.error(f"Provider '{p}' failed to find '{q}'\n"
+                            f"Error code: '{e.status}'\n"
+                            f"Message: '{e.message}'" if hasattr(e, 'message') else "")
+            except ConnectionRefusedError as e:
+                logger.error(f"Unable to connect to provider '{p}': Connection Refused")
             except Exception as e:
-                logging.error(e)
-                pass
+                logger.error(e)
+            if result is not None:
+                logger.info(f"Received {result}")
+                result = result.to_dict()
+                break
 
         # Find result_provider
         if result is None:
@@ -109,10 +115,20 @@ async def search_provider(req: Request, res: Response, q: str, provider: str, lo
 
     if result is None:
         # Retrieve from services
-        if long:
-            result = await PROVIDERS[provider].long_search(text=q)
-        else:
-            result = await PROVIDERS[provider].search(text=q)
+        try:
+            if long:
+                result = await PROVIDERS[provider].long_search(text=q)
+            else:
+                result = await PROVIDERS[provider].search(text=q)
+        except GRPCError as e:
+            logger.error(f"Provider '{provider}' failed to find '{q}'\n"
+                           f"Error code: '{e.status}'\n"
+                           f"Message: '{e.message}'" if hasattr(e, 'message') else "")
+        except ConnectionRefusedError as e:
+            logger.error(f"Unable to connect to provider '{provider}': Connection Refused")
+        except Exception as e:
+            logger.error(e)
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="unknown_error")
         # Find result_provider
         if result is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="result_not_found")
