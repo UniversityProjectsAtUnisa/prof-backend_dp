@@ -58,11 +58,12 @@ class ScraperBritannica(ScraperBase):
             raise GRPCError(status=Status.INTERNAL, message="Request to provider failed")
         soup = bs(r.content, "lxml")
 
-        paragraphs = soup.find('div', {"class": "topic-content"})
+        paragraphs = soup.find('div', {"class": "topic-content"}).find_all("section")
         result = ""
-        for p in paragraphs.section.childGenerator():
-            if p.name in ["p", "span"]:
-                result += p.get_text()
+        for paragraph in paragraphs:
+            for p in paragraph.childGenerator():
+                if p.name in ["p", "h2"]:
+                    result += ((p.get_text()+"\n") if p.name != "h2" else (p.get_text()+"\n\n"))
         if result == "":
             raise GRPCError(status=Status.NOT_FOUND, message="Result not found")
         return result
@@ -75,9 +76,8 @@ class ScraperBritannica(ScraperBase):
 
         paragraphs = soup.find('div', {"class": "topic-content"})
         result = ""
-        for p in paragraphs.section.childGenerator():
-            if p.name in ["p", "span"]:
-                result += p.get_text()
+        for p in paragraphs.section.p.childGenerator():
+            result += p.get_text()
         if result == "":
             raise GRPCError(status=Status.NOT_FOUND, message="Result not found")
         return self._cut_to_grammar_point(result[:1024])
