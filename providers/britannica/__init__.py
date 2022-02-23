@@ -64,6 +64,7 @@ class ScraperBritannica(ScraperBase):
             for p in paragraph.childGenerator():
                 if p.name in ["p", "h2"]:
                     result += ((p.get_text()+"\n") if p.name != "h2" else (p.get_text()+"\n\n"))
+        result = result[:-2]
         if result == "":
             raise GRPCError(status=Status.NOT_FOUND, message="Result not found")
         return result
