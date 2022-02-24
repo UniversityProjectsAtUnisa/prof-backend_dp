@@ -89,12 +89,11 @@ async def search(req: Request, res: Response, q: str, long: bool = False, cache_
             "provider": result_provider,
             "current_language": result["language"],
             "original_language": result["language"],
-            "requested_language": req.state.lang,
             "created_at": datetime.now()
         }
         cache.add(q, result_provider, long, req.state.lang, result)
-    if result["current_language"] != result["requested_language"]:
-        result = translate(result)
+    if result["current_language"] != req.state.lang:
+        result = translate(result, req.state.lang)
         cache.add(q, result_provider, long, req.state.lang, result)
     return result
 
@@ -140,12 +139,11 @@ async def search_provider(req: Request, res: Response, q: str, provider: str, lo
             "provider": provider,
             "current_language": result["language"],
             "original_language": result["language"],
-            "requested_language": req.state.lang,
             "created_at": datetime.now()
         }
         cache.add(q, provider, long, req.state.lang, result)
-    if result["current_language"] != result["requested_language"]:
-        result = translate(result)
+    if result["current_language"] != req.state.lang:
+        result = translate(result, req.state.lang)
         cache.add(q, provider, long, req.state.lang, result)
     return result
 

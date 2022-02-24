@@ -13,7 +13,6 @@ class SuccessResponse(BaseModel):
     provider: str
     current_language: str
     original_language: str
-    requested_language: str
     created_at: datetime
 
 

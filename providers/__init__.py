@@ -14,9 +14,9 @@ def close_client(stub: ScraperStub):
 
 providers_port_mapping = {
     "marco": MARCO_PORT,
+    "britannica": BRITANNICA_PORT,
     "treccani": TRECCANI_PORT,
     "wikipediaen": WIKIPEDIA_EN_PORT,
     "wikipediait": WIKIPEDIA_IT_PORT,
-    "britannica": BRITANNICA_PORT,
     "sapere": SAPERE_PORT
 }

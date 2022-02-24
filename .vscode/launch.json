@@ -8,7 +8,13 @@
       "name": "Python: Module",
       "type": "python",
       "request": "launch",
-      "module": "providers.britannica"
+      "module": "providers.treccani"
+    },
+    {
+      "name": "Python: Main",
+      "type": "python",
+      "request": "launch",
+      "module": "main"
     }
   ]
 }
