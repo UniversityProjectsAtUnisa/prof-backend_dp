@@ -50,8 +50,9 @@ class ScraperTreccani(ScraperBase):
         soup = BeautifulSoup(req.text, 'html.parser')
         if possible_disambiguity == False:
             summary = self._scrape_treccani(soup)
-            summary = summary.text.strip()
-            return ScrapeReply(language="it", disambiguous=False, data=summary)
+            if summary is not None:
+                summary = summary.text.strip()
+                return ScrapeReply(language="it", disambiguous=False, data=summary)
         else:
             if 'www.treccani' in text:
                 text = text.replace('https://www.treccani.it/vocabolario/ricerca/', '')
