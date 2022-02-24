@@ -32,7 +32,7 @@ class ScraperWikipediaEN(ScraperBase):
                 li = item.find_all('li')
                 for l in li:
                     child = l.find("a")
-                    if not ((child.has_attr('class') and child['class'][0] == 'mw-disambig') or
+                    if child is not None and not ((child.has_attr('class') and child['class'][0] == 'mw-disambig') or
                             ('wiktionary' in child['href'] and child['href'] is not None) or
                             child.has_attr('class') and child['class'][0] == 'mw-redirect'):
                         url = (absolute_url + child.get('href'))

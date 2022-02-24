@@ -29,7 +29,7 @@ class ScraperWikipediaIT(ScraperBase):
         final_list = []
         for item in list_li:
             child = item.find("a")
-            if not ((child.has_attr('class') and child['class'][0] == 'mw-disambig') or ('wiktionary' in child['href'] and child['href'] is not None)):
+            if child is not None and not ((child.has_attr('class') and child['class'][0] == 'mw-disambig') or ('wiktionary' in child['href'] and child['href'] is not None)):
                 url = (absolute_url + child.get('href'))
                 final_map = DisamiguousLink(label=item.text, url=url)
                 final_list.append(final_map)
