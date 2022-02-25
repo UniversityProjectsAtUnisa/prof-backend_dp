@@ -83,7 +83,7 @@ async def search(req: Request, res: Response, q: str, long: bool = False, cache_
                 else:
                     result = await stub.search(text=q)
             except GRPCError as e:
-                logger.error(f"Provider '{p}' failed to find '{q}'\n"
+                logger.info(f"Provider '{p}' failed to find '{q}'\n"
                             f"Error code: '{e.status}'\n"
                             f"Message: '{e.message}'" if hasattr(e, 'message') else "")
             except ConnectionRefusedError as e:

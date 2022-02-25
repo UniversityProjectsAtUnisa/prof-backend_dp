@@ -18,6 +18,6 @@ class LocaleMiddleware(BaseHTTPMiddleware):
             lang = DEFAULT_LANG
         lang = lang[0].language
         if lang not in LANGUAGES:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="language_not_available")
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"language_{lang}_not_available")
         request.state.lang = lang
         return await call_next(request)
