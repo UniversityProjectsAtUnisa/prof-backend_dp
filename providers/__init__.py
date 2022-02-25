@@ -19,3 +19,17 @@ providers_port_mapping = {
     "wikipediait": WIKIPEDIA_IT_PORT,
     "sapere": SAPERE_PORT
 }
+
+_providers_priority = {
+    "it": ["wikipediait", "treccani", "sapere", "wikipediaen", "britannica"],
+    "en": ["wikipediaen", "britannica", "wikipediait", "sapere", "treccani"]
+}
+
+
+def provide_by_language(providers, lang):
+    if lang in _providers_priority:
+        for p in _providers_priority[lang]:
+            yield p, providers[p]
+    else:
+        for p in providers_port_mapping:
+            yield p, providers[p]

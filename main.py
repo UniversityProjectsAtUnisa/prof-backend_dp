@@ -7,7 +7,7 @@ from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from grpclib import GRPCError
 from core.middlewares.sentry import SentryMiddleware
 from core.middlewares.locale import LocaleMiddleware
-from providers import providers_port_mapping, create_client, close_client
+from providers import provide_by_language, providers_port_mapping, create_client, close_client
 from common import utils
 from datetime import datetime
 from translation import translate
@@ -74,7 +74,7 @@ async def search(req: Request, res: Response, q: str, long: bool = False, cache_
         # Retrieve from services
 
         result_provider = None
-        for p, stub in PROVIDERS.items():
+        for p, stub in provide_by_language(PROVIDERS, req.state.lang):
             # iterate over providers
             result_provider = p
             try:
