@@ -25,8 +25,8 @@ PROVIDERS: Dict[str, ScraperStub] = None
 
 app = FastAPI()
 
-# app.add_middleware(HTTPSRedirectMiddleware)
-# app.add_middleware(SentryMiddleware)
+app.add_middleware(HTTPSRedirectMiddleware)
+app.add_middleware(SentryMiddleware)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_headers=["*"])
 app.add_middleware(GZipMiddleware, minimum_size=1)
 app.add_middleware(LocaleMiddleware)
