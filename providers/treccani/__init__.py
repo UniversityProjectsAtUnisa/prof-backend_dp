@@ -11,6 +11,14 @@ from grpclib.const import Status
 class ScraperTreccani(ScraperBase):
 
     def _scrape_treccani(self, soup: BeautifulSoup) -> str:
+        """Function used to make the scraping of the pages
+
+        Args:
+            soup(BeautifulSoup): Parse tree used for analize the page
+            
+        Returns:
+            str: the summary(first paragraph)
+            """
         summary = soup.find('div', {'class': 'module-article-full_content'})
         if summary is None:
             for_page_with_vedi_altro = soup.find('div', {'class': 'abstract'})
@@ -18,6 +26,14 @@ class ScraperTreccani(ScraperBase):
         return summary
 
     def _disambiguity_page(self, search_term, soup: BeautifulSoup) -> list:
+        """Function that manages the disambiguity pages
+
+        Args:
+            soup(BeautifulSoup): Parse tree used for analize the page
+            
+        Returns:
+            list: The disambiguity list
+            """
         url_base = 'https://www.treccani.it'
         final_list = []
         final_map = {}
@@ -33,6 +49,17 @@ class ScraperTreccani(ScraperBase):
         return final_list
 
     async def search(self, text: str) -> ScrapeReply:
+        """The function for short long search
+
+        Args:
+            text(str): the input string
+        
+        Raises:
+            GRPCError: An exception to communicate the result not found error
+            
+        Returns:
+            ScrapeReply: The response of the service
+            """
         possible_disambiguity = False
         endpoint = text
         if 'www.treccani.it' in text:
@@ -85,4 +112,12 @@ class ScraperTreccani(ScraperBase):
                 return ScrapeReply(language="it", disambiguous=True, disambiguous_data=disambiguous_link)
 
     async def long_search(self, text: str) -> ScrapeReply:
+        """The function for the long search
+
+        Args:
+            text(str): the input string
+            
+        Returns:
+            ScrapeReply: The response of the service
+            """
         return await self.search(text)
