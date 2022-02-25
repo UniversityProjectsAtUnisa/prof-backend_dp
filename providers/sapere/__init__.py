@@ -6,7 +6,7 @@ from definitions.scraper import ScraperBase, ScrapeReply, DisamiguousLink
 import logging
 from urllib.parse import urljoin
 
-from typing import Callable, Tuple
+from typing import Callable, Tuple, List, Dict
 from grpclib.exceptions import GRPCError
 from grpclib.const import Status
 
@@ -14,18 +14,54 @@ class ScraperSapereIT(ScraperBase):
     _BASE_URL = "https://www.sapere.it"
     _SEARCH_QUERY = "/sapere/search.html?q1="
     _SEARCH_URL = _BASE_URL + _SEARCH_QUERY
+
     def _is_url(self, text: str) -> bool:
+        """ Verify if a string is an url.
+
+        Args:
+            text: the string that will be verified
+
+        Return:
+            A boolean where if it is True mean that the input text is an url, False otherwise
+        """
         return "/" in text
     
     def _cut_to_grammar_point(self, sentences: str) -> str:
+        """ Cut the input string to the last grammar point.
+
+        Args:
+            sentences: the string that will be cutted
+
+        Return:
+            The cutted string
+        """
         for i in range(len(sentences)-1, 0, -1):
             if sentences[i] == ".":
                 return sentences[:i + 1]
     
     def _sanitize_text(self, str: str) -> str:
+        """ Clean the input text from special characters.
+
+        Args:
+            sentences: the string that will be cleaned
+
+        Return:
+            The cleaned string
+        """
         return str.replace("\r", " ").replace("\n", " ").replace("\t", "").strip()
 
-    def _search_scraping(self, url: str) -> dict:
+    def _search_scraping(self, url: str) -> List[Dict[str, str]]:
+        """ The scrape function used to search on provider.
+
+        Args:
+            url: the url of the searching page
+
+        Raises:
+            GRPCError: An exception to communicate two types of error: Result not found and internal error
+
+        Return:
+            A list of dict where every dict as a label that rappresent a disambigous search and short description, and url of the disambigous search
+        """
         r = requests.get(url)
 
         if r.status_code != 200:
@@ -51,6 +87,17 @@ class ScraperSapereIT(ScraperBase):
         return result
 
     def _long_scraping(self, url: str) -> str:
+        """ The scrape function used to get a long description of a item on provider.
+
+        Args:
+            url: the url of the item page
+        
+        Raises:
+            GRPCError: An exception to communicate two types of error: Result not found and internal error
+
+        Return:
+            A string that contains a long description of item
+        """
         r = requests.get(url)
 
         if r.status_code != 200:
@@ -76,9 +123,19 @@ class ScraperSapereIT(ScraperBase):
         return result
 
     def _short_scraping(self, url: str) -> str:
-        r = requests.get(url)
+        """ The scrape function used to get a short description of a item on provider.
 
+        Args:
+            url: the url of the item page
         
+        Raises:
+            GRPCError: An exception to communicate two types of error: Result not found and internal error
+
+        Return:
+            A string that contains a short description of item
+        """
+
+        r = requests.get(url)
 
         if r.status_code != 200:
             raise GRPCError(status=Status.INTERNAL, message="Request to provider failed")
@@ -101,6 +158,18 @@ class ScraperSapereIT(ScraperBase):
         return result
 
     def _choose_strategy(self, text:str, is_long:bool) -> Tuple[bool, Callable, str]:
+        """ Used to decide, with respect to the input text and if the search is long, the scraping function to be used.
+
+        Args:
+            text: the input text of search
+            is_long: if the seearch will be a long search ir not
+
+        Return:
+            A tuple with:
+                disambigous: if the search will be disambigous or not
+                strategy: the scraping function that will be used
+                param: the param of the scraping function
+        """
         disambigous = True
         strategy = None
         param = ""
@@ -133,6 +202,21 @@ class ScraperSapereIT(ScraperBase):
         return (disambigous, strategy, param)
 
     async def search(self, text: str) -> ScrapeReply:
+        """ The interface fuction to make a search called from outside.
+
+        Args:
+            text: a string that rappresent what the clien are searching. It can be an url or a simple sentence
+        
+        Raises:
+            GRPCError: if the result is not found
+        
+        Return:
+            A ScrapeReply object with:
+                language: the language of search
+                disambigous: if the search is diambigous
+                data: the result of search if disambigous is False
+                disambigous_data: the result of search if disambigous is True
+        """
         r = None
         disambigous, strategy, param = self._choose_strategy(text, False)
 
@@ -153,6 +237,21 @@ class ScraperSapereIT(ScraperBase):
 
 
     async def long_search(self, text: str) -> ScrapeReply:
+        """ The interface fuction to make a long search called from outside.
+
+        Args:
+            text: a string that rappresent what the clien are searching. It can be an url or a simple sentence
+        
+        Raises:
+            GRPCError: if the result is not found
+        
+        Return:
+            A ScrapeReply object with:
+                language: the language of search
+                disambigous: if the search is diambigous
+                data: the result of search if disambigous is False
+                disambigous_data: the result of search if disambigous is True
+        """
         r = None
         disambigous, strategy, param = self._choose_strategy(text, True)
 

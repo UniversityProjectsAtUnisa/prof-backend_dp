@@ -6,5 +6,5 @@ from .. import providers_port_mapping
 from config import LOGGING_LEVEL
 
 if __name__ == '__main__':
-    logging.basicConfig(format=LOGGING_FORMAT, level=LOGGING_LEVEL)
+    logging.basicConfig(format=f"WIKIPEDIAIT:::{LOGGING_FORMAT}", level=LOGGING_LEVEL)
     ScraperServer(ScraperWikipediaIT(), port=providers_port_mapping["wikipediait"]).run()

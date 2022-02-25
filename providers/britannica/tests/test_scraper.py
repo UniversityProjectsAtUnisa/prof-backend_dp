@@ -14,6 +14,7 @@ def client():
 
 @pytest.mark.asyncio
 async def test_search_success(client: ScraperBritannica):
+    """ Test a search of an item passing the link. """
     requests = [client.search, client.long_search]
     for req in requests:
         res = await req("/place/Alabama-state")
@@ -25,6 +26,7 @@ async def test_search_success(client: ScraperBritannica):
 
 @pytest.mark.asyncio
 async def test_search_disambiguous(client: ScraperBritannica):
+    """ Test a disambigous search. """
     requests = [client.search, client.long_search]
     for req in requests:
         res = await req("hello")
@@ -37,6 +39,7 @@ async def test_search_disambiguous(client: ScraperBritannica):
 
 @pytest.mark.asyncio
 async def test_disambiguous_link(client: ScraperBritannica):
+    """ Test a disambigous search passing the link. """
     requests = [client.search, client.long_search]
     for req in requests:
         res = await req("https://www.britannica.com/search?query=alabama")
@@ -49,6 +52,7 @@ async def test_disambiguous_link(client: ScraperBritannica):
 
 @pytest.mark.asyncio
 async def test_search_link(client: ScraperBritannica):
+    """ Test a search of an item passing the complete link. """
     requests = [client.search, client.long_search]
     for req in requests:
         res = await req("https://www.britannica.com/place/Alabama-state")

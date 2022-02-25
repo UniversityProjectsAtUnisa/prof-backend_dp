@@ -6,5 +6,5 @@ from .. import providers_port_mapping
 from config import LOGGING_LEVEL
 
 if __name__ == '__main__':
-    logging.basicConfig(format=LOGGING_FORMAT, level=LOGGING_LEVEL)
+    logging.basicConfig(format=f"BRITANNICA:::{LOGGING_FORMAT}", level=LOGGING_LEVEL)
     ScraperServer(ScraperBritannica(), port=providers_port_mapping["britannica"]).run()

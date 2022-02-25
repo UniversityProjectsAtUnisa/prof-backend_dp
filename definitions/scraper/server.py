@@ -1,4 +1,5 @@
 import asyncio
+import logging
 
 from grpclib.server import Server
 from grpclib.utils import graceful_exit
@@ -14,7 +15,7 @@ class ScraperServer:
         server = Server([self._servicer])
         with graceful_exit([server]):
             await server.start(self._host, self._port)
-            print(f'Serving on {self._host}:{self._port}')
+            logging.info(f'Serving on {self._host}:{self._port}')
             await server.wait_closed()
 
     def run(self):
