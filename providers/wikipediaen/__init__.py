@@ -37,6 +37,7 @@ class ScraperWikipediaEN(ScraperBase):
         Returns:
             list: The list of disambiguity
             """
+        invalid_identifier = "action=edit"
         total = soup.find('div', {'class': 'mw-parser-output'})
         absolute_url = 'https://en.wikipedia.org'
         final_map = {}
@@ -51,9 +52,12 @@ class ScraperWikipediaEN(ScraperBase):
                     if child is not None and not ((child.has_attr('class') and child['class'][0] == 'mw-disambig') or
                             ('wiktionary' in child['href'] and child['href'] is not None) or
                             child.has_attr('class') and child['class'][0] == 'mw-redirect'):
-                        url = (absolute_url + child.get('href'))
-                        final_map = DisamiguousLink(label=l.text, url=url)
-                        final_list.append(final_map)
+                        url = (absolute_url + child.get('href')) 
+                        if invalid_identifier not in url:
+                            final_map = DisamiguousLink(label=l.text, url=url)
+                            final_list.append(final_map)
+        if len(final_list) == 0:
+            raise GRPCError(status=Status.NOT_FOUND, message="Text not found")
         return final_list
 
     def _create_soup(self, text: str) -> BeautifulSoup:
