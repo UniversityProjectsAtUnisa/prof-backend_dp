@@ -6,7 +6,6 @@ env_path = path.join(getcwd(), '.env')
 load_dotenv(dotenv_path=env_path)
 
 SENTRY_DSN = get_env_variable("SENTRY_DSN")
-MARCO_PORT = get_env_variable("MARCO_PORT")
 TRECCANI_PORT = get_env_variable("TRECCANI_PORT")
 WIKIPEDIA_EN_PORT = get_env_variable("WIKIPEDIA_EN_PORT")
 WIKIPEDIA_IT_PORT = get_env_variable("WIKIPEDIA_IT_PORT")
