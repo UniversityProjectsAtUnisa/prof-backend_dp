@@ -23,7 +23,7 @@ class ScraperSapereIT(ScraperBase):
                 return sentences[:i + 1]
     
     def _sanitize_text(self, str: str) -> str:
-        return str.replace("\r", "").replace("\n", "").replace("\t", "").strip()
+        return str.replace("\r", " ").replace("\n", " ").replace("\t", "").strip()
 
     def _search_scraping(self, url: str) -> dict:
         r = requests.get(url)
@@ -86,14 +86,16 @@ class ScraperSapereIT(ScraperBase):
         soup = bs(r.content, "lxml")
 
         paragraphs = soup.findAll('div', {"id": re.compile('^p')})
+        sub_result = ""
 
         if len(paragraphs) == 0:
-            raise GRPCError(status=Status.NOT_FOUND, message="Result not found")
-        
-        result = "" 
-        logging.info(paragraphs[0].p.get_text())
-        result += self._cut_to_grammar_point(paragraphs[0].p.get_text()[:1024])
-        logging.info(result)
+            desc = soup.find('div', {"itemprop": "description"})
+            if desc is None:
+                raise GRPCError(status=Status.NOT_FOUND, message="Result not found")
+            sub_result = self._sanitize_text(desc.get_text())
+        else:
+            sub_result = paragraphs[0].p.get_text()
+        result = self._cut_to_grammar_point(sub_result[:1024])
         if result == "":
             raise GRPCError(status=Status.NOT_FOUND, message="Result not found")
         return result
