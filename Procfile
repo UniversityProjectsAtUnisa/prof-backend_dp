@@ -1,4 +1,4 @@
-web: uvicorn main:app
+web: uvicorn main:app --port $PORT
 britannica: python -m providers.britannica
 sapere: python -m providers.sapere
 treccani: python -m providers.treccani
