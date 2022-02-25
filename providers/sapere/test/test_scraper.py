@@ -14,6 +14,7 @@ def client():
 
 @pytest.mark.asyncio
 async def test_search_success(client: ScraperSapereIT):
+    """ Test a search of an item passing the link. """
     requests = [client.search, client.long_search]
     for req in requests:
         res = await req("/enciclopedia/ci%C3%A0o.html")
@@ -26,6 +27,7 @@ async def test_search_success(client: ScraperSapereIT):
 
 @pytest.mark.asyncio
 async def test_search_failed(client: ScraperSapereIT):
+    """ Test a search of an item expecting not found exception. """
     requests = [client.search, client.long_search]
     for req in requests:
         with pytest.raises(GRPCError) as excinfo:
@@ -36,6 +38,7 @@ async def test_search_failed(client: ScraperSapereIT):
 
 @pytest.mark.asyncio
 async def test_search_disambiguous(client: ScraperSapereIT):
+    """ Test a disambigous search passing a word. """
     requests = [client.search, client.long_search]
     for req in requests:
         res = await req("ciao")
@@ -48,6 +51,7 @@ async def test_search_disambiguous(client: ScraperSapereIT):
 
 @pytest.mark.asyncio
 async def test_disambiguous_link(client: ScraperSapereIT):
+    """ Test a disambigous search passing the complete link. """
     requests = [client.search, client.long_search]
     for req in requests:
         res = await req("https://www.sapere.it/sapere/search.html?q1=ciao")
@@ -60,6 +64,7 @@ async def test_disambiguous_link(client: ScraperSapereIT):
 
 @pytest.mark.asyncio
 async def test_search_link(client: ScraperSapereIT):
+    """ Test a search of an item passing the complete link. """
     requests = [client.search, client.long_search]
     for req in requests:
         res = await req("https://www.sapere.it/enciclopedia/ci%C3%A0o.html")
@@ -72,6 +77,7 @@ async def test_search_link(client: ScraperSapereIT):
 
 @pytest.mark.asyncio
 async def test_search_link_failed(client: ScraperSapereIT):
+    """ Test a search of an item passing the complete link expecting not found exception. """
     requests = [client.search, client.long_search]
     for req in requests:
         with pytest.raises(GRPCError) as excinfo:
