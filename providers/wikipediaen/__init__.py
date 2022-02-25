@@ -10,6 +10,14 @@ from grpclib.const import Status
 class ScraperWikipediaEN(ScraperBase):
 
     def _clean(self, text: str) -> str:
+        """Function used to clean the string.
+
+        Args:
+            text (str): The string to clean
+            
+        Returns:
+            str: The cleaned string
+            """
         cleanstring = text
         cleanstring = re.sub('[A-Z]{1}?<=\.', '', cleanstring)
         cleanstring = re.sub('\.?=[A-Z]', '', cleanstring)
@@ -21,6 +29,14 @@ class ScraperWikipediaEN(ScraperBase):
         return cleanstring
 
     def _get_may_refer_to_list(self, soup: BeautifulSoup) -> list:
+        """Function that manages the disambiguity pages
+
+        Args:
+            soup (BeautifulSoup): Parse tree used for analize the page
+            
+        Returns:
+            list: The list of disambiguity
+            """
         total = soup.find('div', {'class': 'mw-parser-output'})
         absolute_url = 'https://en.wikipedia.org'
         final_map = {}
@@ -41,6 +57,17 @@ class ScraperWikipediaEN(ScraperBase):
         return final_list
 
     def _create_soup(self, text: str) -> BeautifulSoup:
+        """Function that creates the soup
+
+        Args:
+            text(str): the input string
+            
+        Raises:
+            GRPCError: An exception to communicate the result not found error
+            
+        Returns:
+            BeautifulSoup: The parse tree
+            """
         if 'en.wikipedia.org' in text:
             endpoint = text
         else:
@@ -56,6 +83,14 @@ class ScraperWikipediaEN(ScraperBase):
         return soup
 
     def _get_summary(self, soup: BeautifulSoup) -> str:
+        """Commodity function used to obtain the summary
+
+        Args:
+            soup(BeautifulSoup): Parse tree used for analize the page
+            
+        Returns:
+            str: the summary(first paragraph)
+            """
         first_paragraph = soup.find('div', {'class': 'mw-parser-output'}).find_all('p', limit=5, recursive=False)
         summary = None
         for p in first_paragraph:
@@ -65,10 +100,29 @@ class ScraperWikipediaEN(ScraperBase):
         return summary
 
     def _is_disambiguous(self, summary: str) -> bool:
+        """Function used to chech if the page is a disasambiguity page
+
+        Args:
+            summary(str): the summary(first paragraph)
+            
+        Returns:
+            bool: a value that establish the disambiguity
+            """
         disambiguous_phrase = 'may refer to'
         return disambiguous_phrase in summary
 
     async def search(self, text: str) -> ScrapeReply:
+        """The function for the short search
+
+        Args:
+            text(str): the input string
+            
+        Raises:
+            GRPCError: An exception to communicate the result not found error
+            
+        Returns:
+            ScrapeReply: The response of the service
+            """
         soup = self._create_soup(text)
         summary = self._get_summary(soup)
         if summary is None:
@@ -80,6 +134,17 @@ class ScraperWikipediaEN(ScraperBase):
         return ScrapeReply(language="en", disambiguous=False, data=summary)
 
     async def long_search(self, text: str) -> ScrapeReply:
+        """The function for the long search
+
+        Args:
+            text(str): the input string
+        
+        Raises:
+            GRPCError: An exception to communicate the result not found error
+            
+        Returns:
+            ScrapeReply: The response of the service
+            """
         soup = self._create_soup(text)
         summary = self._get_summary(soup)
         if summary is None:

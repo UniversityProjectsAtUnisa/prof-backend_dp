@@ -14,6 +14,7 @@ def client():
 
 @pytest.mark.asyncio
 async def test_search_success(client: ScraperWikipediaEN):
+    """ Tests the successful search of a word. """
     requests = [client.search, client.long_search]
     for req in requests:
         res = await req("hello")
@@ -26,6 +27,7 @@ async def test_search_success(client: ScraperWikipediaEN):
 
 @pytest.mark.asyncio
 async def test_search_failed(client: ScraperWikipediaEN):
+    """ Tests the failed search of a word. """
     requests = [client.search, client.long_search]
     for req in requests:
         with pytest.raises(GRPCError) as excinfo:
@@ -36,6 +38,7 @@ async def test_search_failed(client: ScraperWikipediaEN):
 
 @pytest.mark.asyncio
 async def test_search_disambiguous(client: ScraperWikipediaEN):
+    """ Tests the search of a disambiguos word """
     requests = [client.search, client.long_search]
     for req in requests:
         res = await req("marie")
@@ -48,6 +51,7 @@ async def test_search_disambiguous(client: ScraperWikipediaEN):
 
 @pytest.mark.asyncio
 async def test_disambiguous_link(client: ScraperWikipediaEN):
+    """ Tests the search of a disambiguos link """
     requests = [client.search, client.long_search]
     for req in requests:
         res = await req("https://en.wikipedia.org/wiki/Marie")
@@ -60,6 +64,7 @@ async def test_disambiguous_link(client: ScraperWikipediaEN):
 
 @pytest.mark.asyncio
 async def test_search_link(client: ScraperWikipediaEN):
+    """ Tests the successful search of a link. """
     requests = [client.search, client.long_search]
     for req in requests:
         res = await req("https://en.wikipedia.org/wiki/Hello")
@@ -72,6 +77,7 @@ async def test_search_link(client: ScraperWikipediaEN):
 
 @pytest.mark.asyncio
 async def test_search_link_failed(client: ScraperWikipediaEN):
+    """ Tests the failed search of a link. """
     requests = [client.search, client.long_search]
     for req in requests:
         with pytest.raises(GRPCError) as excinfo:

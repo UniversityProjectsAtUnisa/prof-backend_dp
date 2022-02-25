@@ -14,6 +14,7 @@ def client():
 
 @pytest.mark.asyncio
 async def test_search_success(client: ScraperTreccani):
+    """ Tests the successful search of a word. """
     requests = [client.search, client.long_search]
     for req in requests:
         res = await req("consonante")
@@ -26,6 +27,7 @@ async def test_search_success(client: ScraperTreccani):
 
 @pytest.mark.asyncio
 async def test_search_failed(client: ScraperTreccani):
+    """ Tests the failed search of a word. """
     requests = [client.search, client.long_search]
     for req in requests:
         with pytest.raises(GRPCError) as excinfo:
@@ -36,6 +38,7 @@ async def test_search_failed(client: ScraperTreccani):
 
 @pytest.mark.asyncio
 async def test_search_disambiguous(client: ScraperTreccani):
+    """ Tests the search of a disambiguos word """
     requests = [client.search, client.long_search]
     for req in requests:
         res = await req("ciao")
@@ -48,6 +51,7 @@ async def test_search_disambiguous(client: ScraperTreccani):
 
 @pytest.mark.asyncio
 async def test_disambiguous_link(client: ScraperTreccani):
+    """ Tests the search of a disambiguos link """
     requests = [client.search, client.long_search]
     for req in requests:
         res = await req("https://www.treccani.it/vocabolario/ricerca/ciao/")
@@ -60,6 +64,7 @@ async def test_disambiguous_link(client: ScraperTreccani):
 
 @pytest.mark.asyncio
 async def test_search_link(client: ScraperTreccani):
+    """ Tests the successful search of a link. """
     requests = [client.search, client.long_search]
     for req in requests:
         res = await req("https://www.treccani.it/vocabolario/consonante/")
@@ -71,6 +76,7 @@ async def test_search_link(client: ScraperTreccani):
         
 @pytest.mark.asyncio
 async def test_search_link_failed(client: ScraperTreccani):
+    """ Tests the failed search of a link. """
     requests = [client.search, client.long_search]
     for req in requests:
         with pytest.raises(GRPCError) as excinfo:
