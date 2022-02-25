@@ -1,2 +1,2 @@
-web: uvicorn main:app --port $PORT
+web: uvicorn main:app --host=0.0.0.0 --port=${PORT}
 providers: python -m providers
