@@ -1,4 +1,4 @@
-from config import MARCO_PORT, TRECCANI_PORT, WIKIPEDIA_EN_PORT, WIKIPEDIA_IT_PORT, BRITANNICA_PORT, SAPERE_PORT
+from config import TRECCANI_PORT, WIKIPEDIA_EN_PORT, WIKIPEDIA_IT_PORT, BRITANNICA_PORT, SAPERE_PORT
 from definitions.scraper import ScraperStub
 from grpclib.client import Channel
 
@@ -13,7 +13,6 @@ def close_client(stub: ScraperStub):
 
 
 providers_port_mapping = {
-    "marco": MARCO_PORT,
     "britannica": BRITANNICA_PORT,
     "treccani": TRECCANI_PORT,
     "wikipediaen": WIKIPEDIA_EN_PORT,
