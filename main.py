@@ -102,7 +102,7 @@ async def search(req: Request, res: Response, q: str, long: bool = False, cache_
             return JSONResponse(status_code=status.HTTP_409_CONFLICT, content={"data": result['disambiguousData'], "provider": result_provider})
 
         result = {
-            "data": result["data"],
+            "data": result["data"].strip(),
             "provider": result_provider,
             "current_language": result["language"],
             "original_language": result["language"],
@@ -168,7 +168,7 @@ async def search_provider(req: Request, res: Response, q: str, provider: str, lo
             return JSONResponse(status_code=status.HTTP_409_CONFLICT, content={"data": result['disambiguousData'], "provider": provider})
 
         result = {
-            "data": result["data"],
+            "data": result["data"].strip(),
             "provider": provider,
             "current_language": result["language"],
             "original_language": result["language"],
