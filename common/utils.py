@@ -4,6 +4,14 @@ import re
 
 
 def sanitize_string(s: Optional[str]) -> Optional[str]:
+    """Utility function to remove unwanted characters from strings
+
+    Args:
+        s (Optional[str]): the string to sanitize
+
+    Returns:
+        Optional[str]: the sanitized string
+    """
     if s is None:
         return ""
     s = s.lower().strip()
@@ -11,7 +19,17 @@ def sanitize_string(s: Optional[str]) -> Optional[str]:
     return s
 
 
-def get_env_variable(name, default=None):
+def get_env_variable(name: str, default=None) -> Optional[str]:
+    """Utility function to retrieve values of environment variables.
+
+    Args:
+        name (str): the environment variable to retrieve
+        default (str, optional): The default value if the environment variable is not defined. 
+            Defaults to None.
+
+    Returns:
+        Optional[str]: The value of the retrieved environment variable
+    """
     try:
         if default is not None:
             return environ.get(name, default)

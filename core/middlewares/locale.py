@@ -8,6 +8,10 @@ DEFAULT_LANG = "en"
 
 
 class LocaleMiddleware(BaseHTTPMiddleware):
+    """Middleware that parses the value received in accept-language http header
+    in order to extract the requested value.
+    After parsing passes that value in request.state.lang
+    """
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint):
         lang = parse_accept_language(request.headers.get("accept-language"))
         if len(lang) == 0:

@@ -34,6 +34,7 @@ app.add_middleware(LocaleMiddleware)
 
 @app.on_event("startup")
 async def startup_event():
+    """Startup function called at the start of the server"""
     global PROVIDERS
     PROVIDERS = frozendict({k: create_client("localhost", port) for k, port in providers_port_mapping.items()})
     logging.info("Initialized providers")
@@ -41,12 +42,28 @@ async def startup_event():
 
 @app.on_event("shutdown")
 async def shutdown_event():
+    """The shutdown function called at the shutdown of the server"""
     for stub in PROVIDERS.values():
         close_client(stub)
 
 
 @app.get("/search", response_model=SuccessResponse, responses={status.HTTP_409_CONFLICT: {"model": ConflictResponse}})
 async def search(req: Request, res: Response, q: str, long: bool = False, cache_control: Optional[str] = Header(None)):
+    """The search endpoint.
+
+    Args:
+        req (Request): The http request
+        res (Response): The http response
+        q (str): The text to search
+        long (bool, optional): If the search is long or short. Defaults to False.
+        cache_control (Optional[str], optional): The value of cache_control http header. Defaults to Header(None).
+
+    Raises:
+        HTTPException: An exception for internal error, results not found and conflicting results in search.
+
+    Returns:
+        SuccessResponse: The result of the search
+    """
     result = None
     if cache_control is None or not (cache_control.startswith("max-age=") or cache_control.startswith("no-cache")):
         result = cache.retrieve(q, long, req.state.lang, DEFAULT_MAX_AGE)
@@ -100,6 +117,22 @@ async def search(req: Request, res: Response, q: str, long: bool = False, cache_
 
 @app.get("/search/{provider}", response_model=SuccessResponse, responses={status.HTTP_409_CONFLICT: {"model": ConflictResponse}})
 async def search_provider(req: Request, res: Response, q: str, provider: str, long: bool = False, cache_control: Optional[str] = Header(None)):
+    """The search endpoint with specific provider.
+
+    Args:
+        req (Request): The http request
+        res (Response): The http response
+        q (str): The text to search
+        provider (str): the desired provider
+        long (bool, optional): If the search is long or short. Defaults to False.
+        cache_control (Optional[str], optional): The value of cache_control http header. Defaults to Header(None).
+
+    Raises:
+        HTTPException: An exception for internal error, results not found, conflicting results in search and provider unavailability.
+
+    Returns:
+        SuccessResponse: The result of the search
+    """
     provider = utils.sanitize_string(provider)
     if not provider in PROVIDERS:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="provider_not_available")

@@ -1,6 +1,5 @@
-from fastapi.responses import JSONResponse
-from typing import Any
-from googletrans import Translator, LANGUAGES
+from typing import List, Dict, Any
+from googletrans import Translator
 import httpx
 from config import TRANSLATE_TIMEOUT
 from log_config import init_logger
@@ -10,7 +9,18 @@ logger: logging.Logger = init_logger()
 _t = Translator(timeout=httpx.Timeout(TRANSLATE_TIMEOUT))
 
 
-def chunkize(long_text, characters=1024, sep="."):
+def chunkize(long_text: str, characters=1024, sep=".") -> List[str]:
+    """Function used to separate a long text in smaller chunks before translation.
+    Each chunks is long at most 'characters' characters and ends with 'sep' character.
+
+    Args:
+        long_text (str): The text to separate in chunks
+        characters (int, optional): The max length of each chunk. Defaults to 1024.
+        sep (str, optional): The ending character of every chunk. Defaults to ".".
+
+    Returns:
+        List: _description_
+    """
     if len(long_text) < characters:
         return [long_text]
     chunks = []
@@ -28,7 +38,18 @@ def chunkize(long_text, characters=1024, sep="."):
     return chunks
 
 
-def translate(content, lang):
+def translate(content: Dict[str, Any], lang: str) -> Dict[str, Any]:
+    """Translate function that translates content to a desired language.
+    The text to be translated must be in content['data']
+    The language of the text must be in content['current_languange']
+
+    Args:
+        content (Dict[str, Any]): The content to be translated
+        lang (str): The target language
+
+    Returns:
+        Dict[str, Any]: The content with translated data and current_language = lang
+    """
     current = content["current_language"]
     requested = lang
     logger.info(f"TRANSLATION FROM {current} TO {requested}")
