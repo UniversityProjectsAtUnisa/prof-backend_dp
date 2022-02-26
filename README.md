@@ -15,8 +15,12 @@ python modules from requirements.txt
 
 `python3 -m providers.SERVICENAME`
 
-## Start app
+## Start server
 
 `uvicorn main:app --reload`\
 or \
 `python3 main.py`
+
+## Start services
+
+`python3 app.py`
