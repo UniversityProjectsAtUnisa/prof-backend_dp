@@ -108,10 +108,10 @@ async def search(req: Request, res: Response, q: str, long: bool = False, cache_
             "original_language": result["language"],
             "created_at": datetime.now()
         }
-        cache.add(q, result_provider, long, req.state.lang, result)
+        cache.add(q, result_provider, long, result["current_language"], result)
     if result["current_language"] != req.state.lang:
         result = translate(result, req.state.lang)
-        cache.add(q, result_provider, long, req.state.lang, result)
+        cache.add(q, result["provider"], long, req.state.lang, result)
     return result
 
 
@@ -151,7 +151,7 @@ async def search_provider(req: Request, res: Response, q: str, provider: str, lo
             else:
                 result = await PROVIDERS[provider].search(text=q)
         except GRPCError as e:
-            logger.error(f"Provider '{provider}' failed to find '{q}'\n"
+            logger.info(f"Provider '{provider}' failed to find '{q}'\n"
                            f"Error code: '{e.status}'\n"
                            f"Message: '{e.message}'" if hasattr(e, 'message') else "")
         except ConnectionRefusedError as e:
@@ -174,10 +174,10 @@ async def search_provider(req: Request, res: Response, q: str, provider: str, lo
             "original_language": result["language"],
             "created_at": datetime.now()
         }
-        cache.add(q, provider, long, req.state.lang, result)
+        cache.add(q, provider, long, result["current_language"], result)
     if result["current_language"] != req.state.lang:
         result = translate(result, req.state.lang)
-        cache.add(q, provider, long, req.state.lang, result)
+        cache.add(q, result["provider"], long, req.state.lang, result)
     return result
 
 
