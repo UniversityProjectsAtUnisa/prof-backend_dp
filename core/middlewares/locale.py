@@ -16,7 +16,8 @@ class LocaleMiddleware(BaseHTTPMiddleware):
         lang = parse_accept_language(request.headers.get("accept-language"))
         if len(lang) == 0:
             lang = DEFAULT_LANG
-        lang = lang[0].language
+        else:
+            lang = lang[0].language
         if lang not in LANGUAGES:
             raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"language_{lang}_not_available")
         request.state.lang = lang
